@@ -2,19 +2,22 @@ backend:
   name: github
   repo: siruththondan/blog-content   # EXACT repo
   branch: main
-  base_url: https://siruththondan.github.io # PKCE client.html hostname (just the base domain, no path)
+  #base_url: https://siruththondan.in # PKCE client.html hostname (just the base domain, no path)
   auth_endpoint: /admin/client.html # PKCE client.html path
   
-media_folder: "assets/images"
-public_folder: "/images"
 
 collections:
-  - name: "posts"
+  - name: "blog"
     label: "Blog Posts"
-    folder: "posts"
+    folder: "content/blog"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    slug: "{{slug}}"
+    path: "{{slug}}/index.{{lang}}"
+    media_folder: ""
+    public_folder: ""
+
     fields:
+      - { label: "Language", name: "lang", widget: "select", options: ["ta", "en"] }
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime" }
       - { label: "Draft", name: "draft", widget: "boolean", default: false }
