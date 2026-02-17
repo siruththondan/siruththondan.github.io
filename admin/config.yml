@@ -1,25 +1,38 @@
 backend:
-  name: github
-  repo: siruththondan/blog-content   # EXACT repo
-  branch: main
-  #base_url: https://siruththondan.in # PKCE client.html hostname (just the base domain, no path)
-  auth_endpoint: /admin/client.html # PKCE client.html path
+  name: test-repo
+  # name: github
+  # repo: siruththondan/blog-content   # EXACT repo
+  # branch: main
+  # #base_url: https://siruththondan.in # PKCE client.html hostname (just the base domain, no path)
+  # auth_endpoint: /admin/client.html # PKCE client.html path
   
+media_folder: "static/images"
+public_folder: "/images"
 
 collections:
-  - name: "blog"
+  - name: "blogs"
     label: "Blog Posts"
-    folder: "content/blog"
+    folder: "content/blogs"
     create: true
-    slug: "{{slug}}"
-    path: "{{slug}}/index.{{lang}}"
-    media_folder: ""
-    public_folder: ""
 
     fields:
-      - { label: "Language", name: "lang", widget: "select", options: ["ta", "en"] }
       - { label: "Title", name: "title", widget: "string" }
+      - { label: "Author", name: "author", widget: "string", default: "Hugo Authors" }
       - { label: "Date", name: "date", widget: "datetime" }
-      - { label: "Draft", name: "draft", widget: "boolean", default: false }
-      - { label: "Tags", name: "tags", widget: "list", required: false }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - { label: "Categories", name: "categories", widget: "list" }
+      - { label: "Series", name: "series", widget: "list" }
+      - { label: "Aliases", name: "aliases", widget: "list", required: false }
+
+      - label: "Cover"
+        name: "cover"
+        widget: "object"
+        fields:
+          - { label: "Image", name: "image", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
+
+      - { label: "Show Table of Contents", name: "ShowToc", widget: "boolean", default: true }
+      - { label: "Open Table of Contents", name: "TocOpen", widget: "boolean", default: true }
+
       - { label: "Body", name: "body", widget: "markdown" }
