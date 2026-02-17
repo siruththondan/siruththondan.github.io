@@ -7,13 +7,13 @@ backend:
   auth_endpoint: /admin/client.html # PKCE client.html path
 
 
-media_folder: "static/images"
-public_folder: "/images"
+media_folder: "/uploads"
+public_folder: "/uploads"
 
 collections:
   - name: "blogs"
     label: "Blog Posts"
-    folder: "content/blogs"
+    folder: "blogs"
     create: true
 
     fields:
