@@ -1,5 +1,5 @@
-# local_backend: true
 backend:
+  # name: test-repo
   name: github
   repo: siruththondan/blog-content   # EXACT repo
   branch: main
@@ -30,7 +30,7 @@ collections:
         name: "cover"
         widget: "object"
         fields:
-          - { label: "Image", name: "image", widget: "image" }
+          - { label: "Image", name: "image", widget: "image", required: false}
           - { label: "Caption", name: "caption", widget: "string", required: false }
 
       - { label: "Show Table of Contents", name: "ShowToc", widget: "boolean", default: true }

@@ -1,0 +1,16 @@
+.beat {
+  display: inline-block;
+  min-width: 30px;
+  text-align: center;
+  font-family: monospace;
+}
+
+.separator {
+  color: gray;
+  margin: 0 5px;
+}
+
+.error {
+  border-left: 4px solid red;
+  padding-left: 8px;
+}
