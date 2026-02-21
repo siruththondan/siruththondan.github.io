@@ -396,12 +396,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
               <strong>${escapeHtml(c.user_name || 'Anonymous')}</strong>
               <span style="font-size:0.8rem; color:var(--secondary);">${timeAgo(c.created_at)}</span>
-              ${currentUser && currentUser.id === c.user_id
-                ? `<button onclick="deleteComment('${c.id}')"
-                     style="margin-left:auto; padding:3px 10px; font-size:0.78rem;
-                            border:1px solid #f44; border-radius:5px; background:transparent;
-                            color:#f44; cursor:pointer;">Delete</button>`
-                : ''}
             </div>
             <p style="margin:0 0 8px 0; line-height:1.6; white-space:pre-wrap;">${escapeHtml(c.body)}</p>
 
@@ -449,7 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         \x3C!-- Nested Replies -->
         ${childReplies.length > 0
-          ? childReplies.map(r => renderComment(r, {}, true)).join('')
+          ? childReplies.map(r => renderComment(r, replyMap, true)).join('')
           : ''}
       </div>
     `;
@@ -522,12 +516,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  
-  async function deleteComment(id) {
-    if (!confirm('Delete this comment?')) return;
-    const { error } = await db.from('comments').delete().eq('id', id);
-    if (!error) loadComments();
-  }
 
   
   function avatarHtml(c) {
