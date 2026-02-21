@@ -2,36 +2,36 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/blogs/</loc>
+    <loc>https://siruththondan.github.io/blogs/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>https://siruththondan.github.io/tags/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/%E0%AE%86%E0%AE%AF%E0%AF%8D%E0%AE%B5%E0%AF%81/</loc>
+    <loc>https://siruththondan.github.io/tags/%E0%AE%86%E0%AE%AF%E0%AF%8D%E0%AE%B5%E0%AF%81/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/%E0%AE%87%E0%AE%9A%E0%AF%88/</loc>
+    <loc>https://siruththondan.github.io/tags/%E0%AE%87%E0%AE%9A%E0%AF%88/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/%E0%AE%95%E0%AE%B2%E0%AF%8D%E0%AE%B5%E0%AF%86%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AF%81/</loc>
+    <loc>https://siruththondan.github.io/tags/%E0%AE%95%E0%AE%B2%E0%AF%8D%E0%AE%B5%E0%AF%86%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AF%81/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/blogs/kudumiyanmalai_isai_kalvettu/</loc>
+    <loc>https://siruththondan.github.io/blogs/kudumiyanmalai_isai_kalvettu/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/</loc>
+    <loc>https://siruththondan.github.io/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/</loc>
+    <loc>https://siruththondan.github.io/tags/%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/readme/</loc>
+    <loc>https://siruththondan.github.io/readme/</loc>
   </url><url>
-    <loc>/archives/</loc>
+    <loc>https://siruththondan.github.io/archives/</loc>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>https://siruththondan.github.io/categories/</loc>
   </url><url>
-    <loc>/search/</loc>
+    <loc>https://siruththondan.github.io/search/</loc>
   </url>
 </urlset>
