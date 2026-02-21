@@ -251,7 +251,312 @@ document.addEventListener("DOMContentLoaded", function () {
     </li>
 </ul>
 
-  </footer>
+  </footer><div id="comment-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+  <h3 style="margin-bottom: 1.5rem;">💬 Discussion</h3>
+
+  
+  <div id="auth-area" style="margin-bottom: 1.5rem;"></div>
+
+  
+  <div id="comment-form" style="display:none; margin-bottom: 2rem;">
+    <textarea id="comment-body"
+      placeholder="Share your thoughts..."
+      rows="4"
+      style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border);
+             background:var(--entry); color:var(--primary); font-size:0.95rem;
+             resize:vertical; box-sizing:border-box;">
+    </textarea>
+    <button id="submit-btn"
+      onclick="submitComment()"
+      style="margin-top:8px; padding:10px 24px; background:#0070f3; color:#fff;
+             border:none; border-radius:8px; cursor:pointer; font-size:0.95rem;">
+      Post Comment
+    </button>
+    <span id="submit-msg" style="margin-left:12px; font-size:0.85rem;"></span>
+  </div>
+
+  
+  <div id="comments-list">
+    <p style="color:var(--secondary);">Loading comments...</p>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = 'https://yymdffunsdcpuacduqyd.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_k4REygA2RiVWygU7y-liKg_-9RCM_Lr';
+
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const PAGE_SLUG = window.location.pathname;
+  let currentUser = null;
+
+  
+  async function init() {
+    const { data: { session } } = await db.auth.getSession();
+    currentUser = session?.user ?? null;
+    renderAuthArea();
+    loadComments();
+    db.auth.onAuthStateChange((_event, session) => {
+      currentUser = session?.user ?? null;
+      renderAuthArea();
+    });
+  }
+
+  
+  function renderAuthArea() {
+    const area = document.getElementById('auth-area');
+    const form = document.getElementById('comment-form');
+    if (currentUser) {
+      const avatar = currentUser.user_metadata?.avatar_url;
+      const name = currentUser.user_metadata?.full_name || currentUser.email;
+      area.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          ${avatar ? `<img src="${avatar}" style="width:36px;height:36px;border-radius:50%;" />` : ''}
+          <span style="font-weight:600;">${name}</span>
+          <button onclick="signOut()"
+            style="padding:6px 16px; border:1px solid var(--border); border-radius:6px;
+                   background:transparent; color:var(--primary); cursor:pointer; font-size:0.85rem;">
+            Sign Out
+          </button>
+        </div>`;
+      form.style.display = 'block';
+    } else {
+      area.innerHTML = `
+        <button onclick="signInWithGoogle()"
+          style="display:flex; align-items:center; gap:10px; padding:10px 20px;
+                 border:1px solid #ddd; border-radius:8px; background:#fff;
+                 color:#333; cursor:pointer; font-size:0.95rem; font-weight:500;">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" />
+          Sign in with Google to comment
+        </button>`;
+      form.style.display = 'none';
+    }
+  }
+
+  async function signInWithGoogle() {
+    await db.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+  }
+
+  async function signOut() {
+    await db.auth.signOut();
+  }
+
+  
+  async function loadComments() {
+    const list = document.getElementById('comments-list');
+
+    const { data, error } = await db
+      .from('comments')
+      .select('*')
+      .eq('page_slug', PAGE_SLUG)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      list.innerHTML = '<p style="color:red;">Failed to load comments.</p>';
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--secondary);">No comments yet. Be the first!</p>';
+      return;
+    }
+
+    
+    const topLevel = data.filter(c => !c.parent_id);
+    const replies = data.filter(c => c.parent_id);
+
+    
+    const replyMap = {};
+    replies.forEach(r => {
+      if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
+      replyMap[r.parent_id].push(r);
+    });
+
+    list.innerHTML = topLevel.map(c => renderComment(c, replyMap)).join('');
+  }
+
+  
+  function renderComment(c, replyMap, isReply = false) {
+    const childReplies = replyMap[c.id] || [];
+    const indent = isReply
+      ? 'margin-left:52px; border-left: 2px solid var(--border); padding-left:16px;padding-top:0.8rem;'
+      : 'margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border);';
+
+    return `
+      <div id="comment-${c.id}" style="${indent}">
+        <div style="display:flex; gap:14px;">
+          ${avatarHtml(c)}
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+              <strong>${escapeHtml(c.user_name || 'Anonymous')}</strong>
+              <span style="font-size:0.8rem; color:var(--secondary);">${timeAgo(c.created_at)}</span>
+              ${currentUser && currentUser.id === c.user_id
+                ? `<button onclick="deleteComment('${c.id}')"
+                     style="margin-left:auto; padding:3px 10px; font-size:0.78rem;
+                            border:1px solid #f44; border-radius:5px; background:transparent;
+                            color:#f44; cursor:pointer;">Delete</button>`
+                : ''}
+            </div>
+            <p style="margin:0 0 8px 0; line-height:1.6; white-space:pre-wrap;">${escapeHtml(c.body)}</p>
+
+            \x3C!-- Reply Button -->
+            <button onclick="toggleReplyBox('${c.id}')"
+              style="font-size:0.82rem; color:#0070f3; background:none; border:none;
+                     cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;">
+              ↩ Reply
+            </button>
+
+            \x3C!-- Inline Reply Box (hidden by default) -->
+            <div id="reply-box-${c.id}" style="display:none; margin-top:10px;">
+              ${currentUser ? `
+                <textarea id="reply-input-${c.id}"
+                  placeholder="Write a reply..."
+                  rows="3"
+                  style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);
+                         background:var(--entry); color:var(--primary); font-size:0.9rem;
+                         resize:vertical; box-sizing:border-box;">
+                </textarea>
+                <div style="display:flex; gap:8px; margin-top:6px;">
+                  <button onclick="submitReply('${c.id}')"
+                    style="padding:7px 18px; background:#0070f3; color:#fff; border:none;
+                           border-radius:7px; cursor:pointer; font-size:0.88rem;">
+                    Post Reply
+                  </button>
+                  <button onclick="toggleReplyBox('${c.id}')"
+                    style="padding:7px 18px; background:transparent; color:var(--primary);
+                           border:1px solid var(--border); border-radius:7px; cursor:pointer; font-size:0.88rem;">
+                    Cancel
+                  </button>
+                  <span id="reply-msg-${c.id}" style="font-size:0.82rem; align-self:center;"></span>
+                </div>
+              ` : `
+                <p style="font-size:0.88rem; color:var(--secondary);">
+                  <button onclick="signInWithGoogle()"
+                    style="color:#0070f3; background:none; border:none; cursor:pointer; font-size:0.88rem;">
+                    Sign in
+                  </button> to reply
+                </p>
+              `}
+            </div>
+          </div>
+        </div>
+
+        \x3C!-- Nested Replies -->
+        ${childReplies.length > 0
+          ? childReplies.map(r => renderComment(r, {}, true)).join('')
+          : ''}
+      </div>
+    `;
+  }
+
+  
+  function toggleReplyBox(commentId) {
+    const box = document.getElementById(`reply-box-${commentId}`);
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  }
+
+  
+  async function submitReply(parentId) {
+    const input = document.getElementById(`reply-input-${parentId}`);
+    const msg = document.getElementById(`reply-msg-${parentId}`);
+    const body = input.value.trim();
+
+    if (!body) { msg.textContent = '⚠️ Write something first.'; return; }
+
+    msg.textContent = 'Posting...';
+
+    const { error } = await db.from('comments').insert([{
+      page_slug: PAGE_SLUG,
+      body: body,
+      user_id: currentUser.id,
+      user_name: currentUser.user_metadata?.full_name || currentUser.email,
+      user_avatar: currentUser.user_metadata?.avatar_url || null,
+      user_email: currentUser.email,
+      parent_id: parentId
+    }]);
+
+    if (error) {
+      msg.textContent = '❌ Error. Try again.';
+    } else {
+      input.value = '';
+      msg.textContent = '✅ Reply posted!';
+      setTimeout(() => loadComments(), 500);
+    }
+  }
+
+  
+  async function submitComment() {
+    const body = document.getElementById('comment-body').value.trim();
+    const msg = document.getElementById('submit-msg');
+
+    if (!body) { msg.textContent = '⚠️ Please write something.'; return; }
+
+    document.getElementById('submit-btn').disabled = true;
+    msg.textContent = 'Posting...';
+
+    const { error } = await db.from('comments').insert([{
+      page_slug: PAGE_SLUG,
+      body: body,
+      user_id: currentUser.id,
+      user_name: currentUser.user_metadata?.full_name || currentUser.email,
+      user_avatar: currentUser.user_metadata?.avatar_url || null,
+      user_email: currentUser.email,
+      parent_id: null
+    }]);
+
+    document.getElementById('submit-btn').disabled = false;
+
+    if (error) {
+      msg.textContent = '❌ Error posting. Try again.';
+    } else {
+      document.getElementById('comment-body').value = '';
+      msg.textContent = '✅ Posted!';
+      setTimeout(() => msg.textContent = '', 3000);
+      loadComments();
+    }
+  }
+
+  
+  async function deleteComment(id) {
+    if (!confirm('Delete this comment?')) return;
+    const { error } = await db.from('comments').delete().eq('id', id);
+    if (!error) loadComments();
+  }
+
+  
+  function avatarHtml(c) {
+    if (c.user_avatar) {
+      return `<img src="${c.user_avatar}" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;" />`;
+    }
+    return `<div style="width:40px;height:40px;border-radius:50%;background:#0070f3;
+                        display:flex;align-items:center;justify-content:center;
+                        color:#fff;font-weight:700;flex-shrink:0;font-size:1rem;">
+              ${(c.user_name || '?')[0].toUpperCase()}
+            </div>`;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+              .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+
+  function timeAgo(dateStr) {
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff/86400)}d ago`;
+    return new Date(dateStr).toLocaleDateString();
+  }
+
+  init();
+</script>
 </article>
     </main>
     
