@@ -12,8 +12,8 @@ public_folder: "/uploads"
 
 collections:
   - name: "blogs"
-    label: "Blog Posts"
-    folder: "blogs"
+    label: "Blog Posts (hidden — not published)"
+    folder: "_hidden"
     create: true
 
     fields:
